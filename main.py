@@ -111,14 +111,11 @@ def run(x: torch.Tensor, y: torch.Tensor, s_train: torch.Tensor,x_test: torch.Te
             test_loader)
         logging.info('test_loss: {:.4f} test acc: {:.4f} test bca: {:.2f}'
                         .format(test_loss, test_acc, task_bca))
-    # 
     else:
         task_bca = 0
 
     # ======================train user======================
     logging.info(f'=======train user recognize model=======')
-    # args.epochs = 100
-    # args.lr=0.1
     modelF_s, modelC_s = train(modelF_s,modelC_s,train_loader_s,test_loader_s,
                                         optimizer_s,usrloss, tra,
                                         args)
@@ -126,17 +123,6 @@ def run(x: torch.Tensor, y: torch.Tensor, s_train: torch.Tensor,x_test: torch.Te
          test_loader_s)
     logging.info('test_loss: {:.4f} test acc: {:.4f} test bca: {:.2f}'
                     .format(test_loss, test_acc, pid_bca))
-    
-
-    # torch.save(modelF.state_dict(),
-    #                 model_save_path + '/modelF.pt')
-    # torch.save(modelC.state_dict(),
-    #                 model_save_path + '/modelC.pt')
-    
-    # torch.save(modelF_s.state_dict(),
-    #                 model_save_path + '/modelF_s.pt')
-    # torch.save(modelC_s.state_dict(),
-    #                 model_save_path + '/modelC_s.pt')
     
     
     return task_bca, pid_bca, modelF, modelC, modelF_s, modelC_s
@@ -240,13 +226,10 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, default='EEGNet') #ShallowCNN DeepCNN EEGNet
     parser.add_argument('--dataset', type=str, default='ERN')# physionet MI2014001 EPFL
     
-    parser.add_argument('--premask', type=str, default='no')#'optim_l2','adv_l2'  'optim_linf','adv_linf'
-    parser.add_argument('--postmask', nargs='+',default=['adv_linf'])# 0.1_['no', 'rand','square','sn','rand_binary2','optim','optim_linf','optim_l2']
+    parser.add_argument('--postmask', nargs='+',default=['adv_linf'])# ['no', 'rand', 'sn', 'optim_linf', 'adv_linf']
     parser.add_argument('--maskamp', type=float, default=0.5)#['no', 'rand', 'sn', 'optim_linf', 'adv_linf']
 
-    
     parser.add_argument('--alpha', type=float, default=0.01)
-
     parser.add_argument('--nchu', type=int, default=5)
     parser.add_argument('--nmodel', type=int, default=3)
 
@@ -332,17 +315,17 @@ if __name__ == '__main__':
         for p,pm in enumerate(args.postmask):
 
             if args.dataset == 'MI2014001':
-                x_train, y_train, s_train, x_test, y_test, s_test = MI2014001Load(premask=args.premask)
+                x_train, y_train, s_train, x_test, y_test, s_test = MI2014001Load()
             elif args.dataset == 'physionet':
-                x_train, y_train, s_train, x_test, y_test, s_test = physionetLoad(premask=args.premask)
+                x_train, y_train, s_train, x_test, y_test, s_test = physionetLoad()
             elif args.dataset == 'MI2014004':
-                x_train, y_train, s_train, x_test, y_test, s_test = MI2014004Load(premask=args.premask)
+                x_train, y_train, s_train, x_test, y_test, s_test = MI2014004Load()
             elif args.dataset == 'ERN':
-                x_train, y_train, s_train, x_test, y_test, s_test = ERNLoad(premask=args.premask)
+                x_train, y_train, s_train, x_test, y_test, s_test = ERNLoad()
             elif args.dataset == 'p2014009':
-                x_train, y_train, s_train, x_test, y_test, s_test = p3002014009Load(premask=args.premask)
+                x_train, y_train, s_train, x_test, y_test, s_test = p3002014009Load()
             elif args.dataset == 'bcimi':
-                x_train, y_train, s_train, x_test, y_test, s_test = bcimiLoad(premask=args.premask)
+                x_train, y_train, s_train, x_test, y_test, s_test = bcimiLoad()
 
 
             logging.info(f'maskl2: {args.maskl2}')
