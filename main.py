@@ -226,7 +226,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, default='EEGNet') #ShallowCNN DeepCNN EEGNet
     parser.add_argument('--dataset', type=str, default='ERN')# physionet MI2014001 EPFL
     
-    parser.add_argument('--postmask', nargs='+',default=['adv_linf'])# ['no', 'rand', 'sn', 'optim_linf', 'adv_linf']
+    parser.add_argument('--perturbation', nargs='+',default=['adv_linf'])# ['no', 'rand', 'sn', 'optim_linf', 'adv_linf']
     parser.add_argument('--maskamp', type=float, default=0.5)#['no', 'rand', 'sn', 'optim_linf', 'adv_linf']
 
     parser.add_argument('--alpha', type=float, default=0.01)
@@ -268,9 +268,9 @@ if __name__ == '__main__':
     if args.dataset == 'tusz':
         args.batch_size = 256
         # args.epochs = 
-    if args.postmask == ['adv_linf']:
+    if args.perturbation == ['adv_linf']:
         args.nmodel = 3
-    if args.postmask == ['optim_linf']:
+    if args.perturbation == ['optim_linf']:
         args.nmodel = 1
     # ========================model path=======================
     model_path = f'/data1/cxq/model_id/{args.dataset}/{args.model}/'
@@ -281,21 +281,21 @@ if __name__ == '__main__':
     if not os.path.exists(log_path):
         os.makedirs(log_path)
     log_name = os.path.join(log_path,
-                            f'{args.dataset}_{args.model}_{args.maskamp}-{args.postmask}_{args.AT_eps}-{args.train}_base.log')
+                            f'{args.dataset}_{args.model}_{args.maskamp}-{args.perturbation}_{args.AT_eps}-{args.train}_base.log')
     
 
     excel_path = f'/home/xqchen/attack_id_eegn/result/excel'
     if not os.path.exists(excel_path):
         os.makedirs(excel_path)
-    excel_name = os.path.join(excel_path,f'{args.dataset}_{args.model}_{args.maskamp}-{args.postmask}_{args.AT_eps}-{args.train}_base.xlsx')
+    excel_name = os.path.join(excel_path,f'{args.dataset}_{args.model}_{args.maskamp}-{args.perturbation}_{args.AT_eps}-{args.train}_base.xlsx')
     
     # system time
     args.commit = datetime.datetime.now()
     log_name = log_name.replace('.log', f'_{args.commit}.log')
     excel_name = excel_name.replace('.xlsx', f'_{args.commit}.xlsx')
 
-    recorder = np.zeros((args.repeat+2,round(2*len(args.train)*len(args.postmask))))
-    recorder_pert = np.zeros((args.repeat+2,round(2*len(args.postmask))))
+    recorder = np.zeros((args.repeat+2,round(2*len(args.train)*len(args.perturbation))))
+    recorder_pert = np.zeros((args.repeat+2,round(2*len(args.perturbation))))
     
     # ========================logging========================
     logger = logging.getLogger()
@@ -312,7 +312,7 @@ if __name__ == '__main__':
     # ========================model train========================
     for r in range(args.repeat):
         seed(r)
-        for p,pm in enumerate(args.postmask):
+        for p,pm in enumerate(args.perturbation):
 
             if args.dataset == 'MI2014001':
                 x_train, y_train, s_train, x_test, y_test, s_test = MI2014001Load()
@@ -404,7 +404,7 @@ if __name__ == '__main__':
                     os.makedirs(model_save_path)
                 args.model_path = model_save_path
 
-                logging.info(f'********** repeat: {r}, postmask: {pm}, training: {tra} **********')
+                logging.info(f'********** repeat: {r}, perturbation: {pm}, training: {tra} **********')
 
                 task_bca, pid_bca, modelF,modelC,modelF_s, modelC_s = run(x_train, y_train, s_train,
                                                         x_test, y_test, s_test, tra, args)
@@ -421,12 +421,12 @@ if __name__ == '__main__':
 
     recorder_df = DataFrame(recorder,
                index = [f'repeat_{g}' for g in range(args.repeat)]+['mean', 'std'],
-               columns = pd.MultiIndex.from_product([[g for g in args.postmask],
+               columns = pd.MultiIndex.from_product([[g for g in args.perturbation],
                                                    [g for g in args.train],['Task', 'PID']]))
 
     recorder_pert_df = DataFrame(recorder_pert,
                index = [f'repeat_{g}' for g in range(args.repeat)]+['mean', 'std'],
-               columns = pd.MultiIndex.from_product([[g for g in args.postmask],['Linf', 'L2']]))
+               columns = pd.MultiIndex.from_product([[g for g in args.perturbation],['Linf', 'L2']]))
 
     logging.info(print_args(args) + '\n')
     logging.info('================================final result================================')
