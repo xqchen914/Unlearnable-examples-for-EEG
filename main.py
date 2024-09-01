@@ -243,13 +243,12 @@ if __name__ == '__main__':
     parser.add_argument('--premask', type=str, default='no')#'optim_l2','adv_l2'  'optim_linf','adv_linf'
     parser.add_argument('--postmask', nargs='+',default=['adv_linf'])# 0.1_['no', 'rand','square','sn','rand_binary2','optim','optim_linf','optim_l2']
     parser.add_argument('--maskamp', type=float, default=0.5)#['no', 'rand', 'sn', 'optim_linf', 'adv_linf']
-    parser.add_argument('--maskl2_ind', type=float, default=0.3)#['no', 'rand', 'rand_binary2']
 
     
     parser.add_argument('--alpha', type=float, default=0.01)
 
     parser.add_argument('--nchu', type=int, default=5)
-    parser.add_argument('--nmodel', type=int, default=1)
+    parser.add_argument('--nmodel', type=int, default=3)
 
     parser.add_argument('--train',  nargs='+',default=['NT'])  # 0.1_['NT', 'ATchastd']
     parser.add_argument('--AT_eps', type=float,
@@ -299,13 +298,13 @@ if __name__ == '__main__':
     if not os.path.exists(log_path):
         os.makedirs(log_path)
     log_name = os.path.join(log_path,
-                            f'{args.dataset}_{args.model}_{args.maskamp}-{args.maskl2_ind}-{args.postmask}_{args.AT_eps}-{args.train}_base.log')
+                            f'{args.dataset}_{args.model}_{args.maskamp}-{args.postmask}_{args.AT_eps}-{args.train}_base.log')
     
 
     excel_path = f'/home/xqchen/attack_id_eegn/result/excel'
     if not os.path.exists(excel_path):
         os.makedirs(excel_path)
-    excel_name = os.path.join(excel_path,f'{args.dataset}_{args.model}_{args.maskamp}-{args.maskl2_ind}-{args.postmask}_{args.AT_eps}-{args.train}_base.xlsx')
+    excel_name = os.path.join(excel_path,f'{args.dataset}_{args.model}_{args.maskamp}-{args.postmask}_{args.AT_eps}-{args.train}_base.xlsx')
     
     # system time
     args.commit = datetime.datetime.now()
@@ -345,7 +344,6 @@ if __name__ == '__main__':
             elif args.dataset == 'bcimi':
                 x_train, y_train, s_train, x_test, y_test, s_test = bcimiLoad(premask=args.premask)
 
-            args.maskl2 = np.sqrt((x_train.shape[-1]*x_train.shape[-2])*(args.maskl2_ind * np.std(x_train))**2)
 
             logging.info(f'maskl2: {args.maskl2}')
 
@@ -418,7 +416,7 @@ if __name__ == '__main__':
             torch.cuda.empty_cache()
 
             for t,tra in enumerate(args.train):
-                model_save_path = os.path.join(model_path, f'{r}/{args.maskamp}_{args.maskl2_ind}_{pm}/{args.AT_eps}_{tra}')
+                model_save_path = os.path.join(model_path, f'{r}/{args.maskamp}_{pm}/{args.AT_eps}_{tra}')
                 if not os.path.exists(model_save_path):
                     os.makedirs(model_save_path)
                 args.model_path = model_save_path
