@@ -72,8 +72,6 @@ def PGD(feature_ext: nn.Module,
 
 
 
-  
-
 
 def adv_linf(x, s_label,linf, args):
     chans, samples = x.shape[2], x.shape[3]
@@ -105,11 +103,6 @@ def adv_linf(x, s_label,linf, args):
                         D=2,
                         F2=8,
                         dropoutRate=0.25))
-        # elif args.model == 'DeepCNN':
-        #     feature_ext = DeepConvNet(Chans=chans, Samples=samples, dropoutRate=0.5)
-        # elif args.model == 'ShallowCNN':
-        #     feature_ext = ShallowConvNet(Chans=chans, Samples=samples, dropoutRate=0.5)
-
 
         fs[i].to(args.device)
         cs.append(Discriminator(
@@ -191,8 +184,6 @@ def adv_linf(x, s_label,linf, args):
 
 
         if (epoch + 1) % 10 == 0:
-            # feature_ext.eval()
-            # discriminator.eval()
             test_loss, test_acc = eval(
                 fs[0], cs[0], criterion,
                 (x + (torch.tanh(perturbation[s_label.squeeze()]) * linf).cpu()).detach(), s_label)
@@ -215,7 +206,6 @@ def adv_linf(x, s_label,linf, args):
 
 def unlearnable_optim_linf(x, s_label,linf, args):
     chans, samples = x.shape[2], x.shape[3]
-    # 创建一个自定义函数来实现clip_by_value
 
     x = Variable(
         torch.from_numpy(x).type(torch.FloatTensor))
@@ -250,9 +240,7 @@ def unlearnable_optim_linf(x, s_label,linf, args):
         fs[i].apply(init_weights)
         cs[i].apply(init_weights)
 
-
     criterion = nn.CrossEntropyLoss().to(args.device)
-
 
 
     logging.info('gen unlearnable examples')
@@ -289,8 +277,6 @@ def unlearnable_optim_linf(x, s_label,linf, args):
 
 
         if (epoch + 1) % 10 == 0:
-            # feature_ext.eval()
-            # discriminator.eval()
             test_loss, test_acc = eval(
                 fs[i], cs[i], criterion,
                 (x + (torch.tanh(perturbation[s_label.squeeze()]) * linf).cpu()).detach(), s_label)
