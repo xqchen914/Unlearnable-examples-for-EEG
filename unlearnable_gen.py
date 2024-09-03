@@ -75,7 +75,6 @@ def PGD(feature_ext: nn.Module,
 
 def adv_linf(x, s_label,linf, args):
     chans, samples = x.shape[2], x.shape[3]
-    # 创建一个自定义函数来实现clip_by_value
 
     x = Variable(
         torch.from_numpy(x).type(torch.FloatTensor))
@@ -111,8 +110,6 @@ def adv_linf(x, s_label,linf, args):
 
         fs[i].apply(init_weights)
         cs[i].apply(init_weights)
-
-
         
         params = []
         for _, v in fs[i].named_parameters():
@@ -133,7 +130,6 @@ def adv_linf(x, s_label,linf, args):
                 optimizer.zero_grad()
                 feature = fs[i](batch_x)
                 s_pred = cs[i](feature)
-
 
                 loss = criterion(s_pred, batch_s)
                 loss.backward()
@@ -280,13 +276,11 @@ def unlearnable_optim_linf(x, s_label,linf, args):
             test_loss, test_acc = eval(
                 fs[i], cs[i], criterion,
                 (x + (torch.tanh(perturbation[s_label.squeeze()]) * linf).cpu()).detach(), s_label)
-
             
             logging.info(
                 'Epoch {}/{}: subject loss: {:.4f} subject acc: {:.2f} | max perturbation:{:.2f}'
                 .format(epoch + 1, 100, 
                         test_loss, test_acc, torch.max(torch.abs((torch.tanh(perturbation) * linf).cpu())).item()))
-    
 
     return (x + (torch.tanh(perturbation[s_label.squeeze()]) * linf).cpu()).detach().numpy()
 
@@ -300,7 +294,6 @@ def eval(model1: nn.Module, model2: nn.Module, criterion: nn.Module,
                              batch_size=128,
                              shuffle=False,
                              drop_last=False,num_workers=3)
-
     loss, correct = 0., 0
     labels, preds = [], []
     with torch.no_grad():
